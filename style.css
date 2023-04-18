@@ -1,0 +1,157 @@
+body {
+  background-color: #000000;
+  
+}
+
+/* Rest des CSS-Codes hier */
+
+#background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.24);
+  display: block;
+  z-index: 1;
+}
+
+h1 {
+  color: #ffffff;
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 40px;
+}
+
+#game {
+  position: relative;
+  width: 640px;
+  height: 370px;
+  margin: 0 auto;
+  margin-top: 50px;
+  background-image: url('hintergrund.png');
+  background-size: cover;
+}
+
+#score {
+  position: absolute;
+  top: -27px;
+  left: 10px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 18px;
+  font-weight: bold;
+  color: rgb(255, 255, 255);
+}
+
+#mario {
+  position: absolute;
+  left: 50px;
+  bottom: 57px;
+  width: 50px;
+  height: 50px;
+  background-image: url('player.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+#obstacle {
+  position: absolute;
+  right: 50px;
+  bottom: 62px;
+  width: 68px;
+  height: 80px;
+  background-image: url('baum2.png');
+  background-size: auto 100%;
+}
+
+#start-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 50px;
+  padding: 20px 40px;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+#game-over {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.7);
+  z-index: 100;
+}
+
+#game-over img {
+  display: block;
+  margin: 0 auto;
+  top: 0;
+  left: 0;
+  width: 64%;
+  height: auto;
+  margin-top: 0%;
+}
+
+
+
+  
+
+#restart-button {
+  position: absolute;
+  left: 320px;
+  bottom: 10px;
+  width: 100px;
+  height: 50px;
+  transform: translate(-50%, -50%);
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  background-image: url('reset1.png');
+  background-color: rgba(255, 255, 255, 0.05);;
+  background-size: contain; /* Hintergrundbild anpassen */
+  background-repeat: no-repeat; /* Bildwiederholung verhindern */
+  background-position: center; 
+}
+
+
+#game-over #score {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 36px;
+  font-weight: bold;
+  color: #a72222; /* Schriftfarbe auf rot geändert */
+  position: absolute;
+  margin-top: 17%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 4;
+  display: none;
+}
+  
+#start-screen {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+  
+
+  
