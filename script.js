@@ -6,7 +6,7 @@ let score = 0;
 let gameInterval;
 let speedIncreaseInterval;
 const jumpSpeed = 10;
-const topSpeed = 13; // Maximalgeschwindigkeit für Hindernisse
+const topSpeed = 12; // Maximalgeschwindigkeit für Hindernisse
 let obstacleSpeed = 5;
 
 
@@ -52,7 +52,7 @@ function update() {
     document.getElementById("score").innerHTML = "Score: " + score;
   }
   
-  if (score % 50 === 0 && score > 0 && obstacleSpeed < topSpeed) {
+  if (score % 200 === 0 && score > 0 && obstacleSpeed < topSpeed) {
     clearInterval(speedIncreaseInterval);
     obstacleSpeed += 1;
     if (obstacleSpeed >= topSpeed) {
