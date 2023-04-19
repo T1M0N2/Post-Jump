@@ -6,7 +6,7 @@ let score = 0;
 let gameInterval;
 let speedIncreaseInterval;
 const jumpSpeed = 10;
-const topSpeed = 14; // Maximalgeschwindigkeit für Hindernisse
+const topSpeed = 13; // Maximalgeschwindigkeit für Hindernisse
 let obstacleSpeed = 5;
 
 
