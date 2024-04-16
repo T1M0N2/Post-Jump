@@ -11,9 +11,31 @@ self.addEventListener('beforeinstallprompt', (event) => {
     showInstallPrompt();
 });
 
-
 function showInstallPrompt() {
     // Hier können Sie Ihren eigenen Code hinzufügen, um das Installations-Popup anzuzeigen
+    // Zum Beispiel könnten Sie einen Button oder ein Modalfenster anzeigen, das den Benutzer zur Installation einlädt
+    // Hier ist ein einfaches Beispiel, wie ein Button zum Installations-Popup führen kann
+    const installButton = document.createElement('button');
+    installButton.textContent = 'Installieren';
+    installButton.addEventListener('click', () => {
+        // Überprüfen, ob deferredPrompt verfügbar ist
+        if (deferredPrompt) {
+            // Das Installations-Popup anzeigen
+            deferredPrompt.prompt();
+            // Warten, bis der Benutzer auf Installieren, Abbrechen oder Ignorieren klickt
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('Benutzer hat die Installation akzeptiert');
+                } else {
+                    console.log('Benutzer hat die Installation abgelehnt');
+                }
+                // Setzen von deferredPrompt auf null, da das Installations-Popup nur einmal angezeigt werden kann
+                deferredPrompt = null;
+            });
+        }
+    });
+    // Fügen Sie den Button zur Webseite hinzu
+    document.body.appendChild(installButton);
 }
 
 // Der restliche Code Ihres Service Worker-Skripts bleibt unverändert
