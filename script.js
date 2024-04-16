@@ -104,6 +104,11 @@ function startGame() {
       jump();
     }
   });
+
+  // Added event listener for touchstart event
+  document.addEventListener("touchstart", () => {
+    jump();
+  });
 }
 
 function gameOver() {
@@ -118,13 +123,7 @@ function gameOver() {
   });
 }
 
-
-
-
-
-
 // Main
 document.getElementById("start-button").addEventListener("click", () => {
   startGame();
 });
-

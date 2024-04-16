@@ -3,6 +3,7 @@
 <head>
   <title>Post Jump</title>
   <link rel="icon" href="home.png">
+  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
@@ -18,7 +19,19 @@
       <button id="restart-button"></button>
     </div>
   </div>
-  <script src="script.js"></script>
+  <script src="script.js">
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/serviceworker.js')
+        .then(registration => {
+          console.log('Service Worker registered: ', registration);
+        })
+        .catch(error => {
+          console.log('Service Worker registration failed: ', error);
+        });
+    });
+  }
+</script>
 </body>
 </html>
 
