@@ -38,6 +38,43 @@ function showInstallPrompt() {
     document.body.appendChild(installButton);
 }
 
+// Berechtigungen für Benachrichtigungen anfordern
+if ('Notification' in window && navigator.serviceWorker) {
+    Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+            // Berechtigung erteilt, Benachrichtigungen können gesendet werden
+            // Registrieren Sie den Service Worker für Push-Benachrichtigungen
+            registerServiceWorker();
+        }
+    });
+}
+
+// Registrieren des Service Workers für Push-Benachrichtigungen
+function registerServiceWorker() {
+    navigator.serviceWorker.register('service-worker.js').then(registration => {
+        // Erfolgreich registriert
+        console.log('Service Worker erfolgreich registriert');
+        // Fügen Sie hier Code hinzu, um die Push-Benachrichtigung zu senden
+    }).catch(error => {
+        // Fehler beim Registrieren des Service Workers
+        console.error('Fehler beim Registrieren des Service Workers:', error);
+    });
+}
+
+// Push-Benachrichtigung senden
+function sendNotification() {
+    // Überprüfen, ob der Service Worker verfügbar ist
+    if ('serviceWorker' in navigator) {
+        // Überprüfen, ob der Service Worker bereit ist
+        navigator.serviceWorker.ready.then(registration => {
+            // Benachrichtigung erstellen
+            registration.showNotification('Hallo Welt!', {
+                body: 'Dies ist eine Push-Benachrichtigung.',
+                icon: 'icon.png'
+            });
+        });
+    }
+}
 
 // Name des Cache
 const cacheName = 'post-jump-v1';
