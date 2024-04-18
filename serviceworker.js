@@ -38,19 +38,22 @@ function showInstallPrompt() {
     document.body.appendChild(installButton);
 }
 
-// Der restliche Code Ihres Service Worker-Skripts bleibt unverändert
-const cacheName = 'pwa-cache-v1';
+
+// Name des Cache
+const cacheName = 'post-jump-v1';
+
+// Dateien, die gecacht werden sollen
 const filesToCache = [
     '/',
     'index.html',
     'manifest.json',
     'home.png',
-	'style.css',
-	'script.js',
-
-    // Fügen Sie hier weitere Ressourcen hinzu, die gecacht werden sollen
+    'style.css',
+    'script.js',
+    // Weitere Ressourcen hinzufügen, die gecacht werden sollen
 ];
- 
+
+// Installationsereignis
 self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(cacheName)
@@ -59,12 +62,36 @@ self.addEventListener('install', event => {
             })
     );
 });
- 
+
+// Fetch-Ereignis, um Ressourcen abzurufen
 self.addEventListener('fetch', event => {
     event.respondWith(
         caches.match(event.request)
             .then(response => {
-                return response || fetch(event.request);
+                // Ressource aus dem Cache bedienen, falls vorhanden
+                if (response) {
+                    return response;
+                }
+                // Andernfalls von der Netzwerkquelle holen (falls online)
+                return fetch(event.request);
+            }).catch(() => {
+                // Im Falle eines Fehlers (z.B. Netzwerkfehler), den Offline-Fallback anzeigen
+                return caches.match('/offline.html');
             })
+    );
+});
+
+// Optional: Aktualisieren des Service Workers und Bereinigen des Caches
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(cache => {
+                    if (cache !== cacheName) {
+                        return caches.delete(cache);
+                    }
+                })
+            );
+        })
     );
 });
