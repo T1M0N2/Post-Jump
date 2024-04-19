@@ -8,10 +8,8 @@ let speedIncreaseInterval;
 const jumpSpeed = 10;
 const topSpeed = 12; // Maximalgeschwindigkeit für Hindernisse
 let obstacleSpeed = 5;
-
-
-// Define all elements as variables
-const startButton = document.getElementById('start-button');
+const leaderboardSize = 5; // Größe der Bestenliste
+let leaderboard = [];
 
 // Functions
 function jump() {
@@ -116,7 +114,20 @@ function gameOver() {
   let endScreen = document.getElementById("game-over");
   endScreen.style.display = "block"; // show the game over screen
   
-  
+  // Save score to leaderboard
+  leaderboard.push(score);
+  leaderboard.sort((a, b) => b - a); // Sort in descending order
+  leaderboard = leaderboard.slice(0, leaderboardSize); // Keep only the top scores
+
+  // Display leaderboard
+  let leaderboardList = document.getElementById("leaderboard-list");
+  leaderboardList.innerHTML = ""; // Clear previous entries
+  leaderboard.forEach((score, index) => {
+    let listItem = document.createElement("li");
+    listItem.textContent = "Run " + (index + 1) + ": " + score;
+    leaderboardList.appendChild(listItem);
+  });
+
   let restartButton = document.getElementById("restart-button");
   restartButton.addEventListener("click", () => {
     location.reload(); // refresh the page to restart the game
