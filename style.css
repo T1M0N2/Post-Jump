@@ -154,28 +154,4 @@ h1 {
 }
   
 
-
-
-#leaderboard {
-  position: absolute;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%);
-  color: white;
-  text-align: right;
-}
-
-#leaderboard h2 {
-  margin-bottom: 5px;
-}
-
-#leaderboard-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-#leaderboard-list li {
-  margin-bottom: 5px;
-}
-
+  
