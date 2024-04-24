@@ -9,9 +9,47 @@ const jumpSpeed = 10;
 const topSpeed = 12; // Maximalgeschwindigkeit für Hindernisse
 let obstacleSpeed = 5;
 const leaderboardSize = 5; // Größe der Bestenliste
-let leaderboard = [];
+let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
 
 // Functions
+function updateLeaderboard() {
+  let leaderboardList = document.getElementById("leaderboard-list");
+  leaderboardList.innerHTML = ""; // Clear previous entries
+  leaderboard.forEach((score, index) => {
+    let listItem = document.createElement("li");
+    listItem.textContent = "Run " + (index + 1) + ": " + score;
+    leaderboardList.appendChild(listItem);
+  });
+}
+
+function gameOver() {
+  clearInterval(gameInterval); // stop the game loop
+  let endScreen = document.getElementById("game-over");
+  endScreen.style.display = "block"; // show the game over screen
+  
+  // Save score to leaderboard
+  leaderboard.push(score);
+  leaderboard.sort((a, b) => b - a); // Sort in descending order
+  leaderboard = leaderboard.slice(0, leaderboardSize); // Keep only the top scores
+  localStorage.setItem('leaderboard', JSON.stringify(leaderboard)); // Save to local storage
+
+  // Display leaderboard
+  updateLeaderboard();
+
+  let restartButton = document.getElementById("restart-button");
+  restartButton.addEventListener("click", () => {
+    location.reload(); // refresh the page to restart the game
+  });
+}
+
+// Main
+document.getElementById("start-button").addEventListener("click", () => {
+  startGame();
+});
+
+// Initialize leaderboard on page load
+updateLeaderboard();
+
 function jump() {
   let mario = document.getElementById("mario");
   if (!isJumping) {
@@ -108,33 +146,3 @@ function startGame() {
     jump();
   });
 }
-
-function gameOver() {
-  clearInterval(gameInterval); // stop the game loop
-  let endScreen = document.getElementById("game-over");
-  endScreen.style.display = "block"; // show the game over screen
-  
-  // Save score to leaderboard
-  leaderboard.push(score);
-  leaderboard.sort((a, b) => b - a); // Sort in descending order
-  leaderboard = leaderboard.slice(0, leaderboardSize); // Keep only the top scores
-
-  // Display leaderboard
-  let leaderboardList = document.getElementById("leaderboard-list");
-  leaderboardList.innerHTML = ""; // Clear previous entries
-  leaderboard.forEach((score, index) => {
-    let listItem = document.createElement("li");
-    listItem.textContent = "Run " + (index + 1) + ": " + score;
-    leaderboardList.appendChild(listItem);
-  });
-
-  let restartButton = document.getElementById("restart-button");
-  restartButton.addEventListener("click", () => {
-    location.reload(); // refresh the page to restart the game
-  });
-}
-
-// Main
-document.getElementById("start-button").addEventListener("click", () => {
-  startGame();
-});
