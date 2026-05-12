@@ -61,17 +61,8 @@ const hiEl=document.getElementById('hi-val');
 const overlay=document.getElementById('overlay');
 const msgEl=document.getElementById('msg');
 
-// ── Level config ───────────────────────────────────────────────
-// Each level: {scoreThreshold, label, baseSpeed, hasPits, hasBirds, flashCol}
-const LEVELS=[
-  {t:0,   label:'LVL 1 — Warm up',   spd:5.5, pits:false, birds:false, col:'#55aaff'},
-  {t:150, label:'LVL 2 — Pick it up',spd:7,   pits:false, birds:false, col:'#55ff99'},
-  {t:350, label:'LVL 3 — Watch out!', spd:8.5, pits:true,  birds:false, col:'#ffcc44'},
-  {t:600, label:'LVL 4 — Danger!',   spd:10,  pits:true,  birds:true,  col:'#ff8844'},
-  {t:900, label:'LVL 5 — INSANE',    spd:12,  pits:true,  birds:true,  col:'#ff4455'},
-];
-let lvl=0; // current level index
-let levelFlash=0; // frames to show level banner
+// ── Difficulty (score-based, no level labels) ──────────────────
+// speed, pits and birds scale smoothly with score
 
 // ── Player ────────────────────────────────────────────────────
 const P={x:70, y:GROUND, vy:0, onGround:true};
@@ -95,7 +86,6 @@ function pad(n,d){return String(Math.floor(n)).padStart(d,'0');}
 
 function updateHUD(){
   hiEl.textContent=pad(Math.max(score,best),5);
-  const l=LEVELS[lvl];
 }
 
 function collides(ax,ay,aw,ah,bx,by,bw,bh){
@@ -134,7 +124,7 @@ function startGame(){
   if(raf!==null){cancelAnimationFrame(raf);raf=null;}
 
   state='running';
-  frame=0; score=0; lvl=0; levelFlash=0;
+  frame=0; score=0;
   obs=[]; obstacles=obs; birds=[]; pits=[];
   P.x=70; P.y=GROUND; P.vy=0; P.onGround=true;
   groundX=0;
@@ -229,7 +219,7 @@ function drawPlayer(dead){
   // Visor
   X.fillStyle='#111';
   X.fillRect(px+3,py+5,PW-6,8);
-  X.fillStyle=lvl>=2?LEVELS[lvl].col:'#55aaff';
+  X.fillStyle='#55aaff';
   X.fillRect(px+4,py+6,PW-11,6);
   // Visor glare
   X.fillStyle='rgba(255,255,255,0.35)';
@@ -284,19 +274,7 @@ function drawScore(){
   X.fillText(pad(score,5),10,8);
 }
 
-function drawLevelFlash(){
-  if(levelFlash>0){
-    const alpha=Math.min(1,levelFlash/20);
-    X.globalAlpha=alpha;
-    X.fillStyle=LEVELS[lvl].col;
-    X.font='bold 11px -apple-system,monospace';
-    X.textAlign='center';
-    X.textBaseline='middle';
-    X.fillText(LEVELS[lvl].label, W/2, H/2-10);
-    X.globalAlpha=1;
-    levelFlash--;
-  }
-}
+
 
 // Single draw pass — called from loop and once from die()
 function drawFrame(dead){
@@ -307,7 +285,6 @@ function drawFrame(dead){
   for(const b of birds)drawBird(b);
   drawPlayer(!!dead);
   drawScore();
-  drawLevelFlash();
 }
 
 // ── Main loop ─────────────────────────────────────────────────
@@ -315,18 +292,8 @@ function loop(){
   raf=requestAnimationFrame(loop);
   frame++;
 
-  const curLvl=LEVELS[lvl];
-  const spd=curLvl.spd;
-
-  // ── Level check ──
-  for(let i=LEVELS.length-1;i>=0;i--){
-    if(score>=LEVELS[i].t&&i!==lvl){
-      lvl=i;
-      levelFlash=80;
-      updateHUD();
-      break;
-    }
-  }
+  // Speed scales smoothly with score, like Chrome dino
+  const spd=Math.min(13, 5.5 + score/100);
 
   // ── Score ──
   if(frame%6===0){score++;if(frame%30===0)updateHUD();}
@@ -363,7 +330,7 @@ function loop(){
   }
 
   // ── Spawn birds ──
-  if(curLvl.birds){
+  if(score>=300){
     nextBird--;
     if(nextBird<=0){
       spawnBird();
@@ -372,7 +339,7 @@ function loop(){
   }
 
   // ── Spawn pits ──
-  if(curLvl.pits){
+  if(score>=200){
     nextPit--;
     if(nextPit<=0){
       // Only spawn pit if no obstacle is close to landing zone
