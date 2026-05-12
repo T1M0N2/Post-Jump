@@ -1,350 +1,425 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <title>Post Jump</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden;touch-action:none}
-body{background:#07070f;display:flex;flex-direction:column;align-items:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-#wrap{width:100%;max-width:680px;display:flex;flex-direction:column;height:100vh;height:100dvh}
-
-/* HUD */
-#hud{display:flex;justify-content:space-between;align-items:center;padding:10px 18px;padding-top:max(10px,env(safe-area-inset-top));background:#0f0f1e;border-bottom:1px solid #1e1e3a;flex-shrink:0}
-.hud-block{display:flex;flex-direction:column;align-items:center;gap:2px}
-.hud-label{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#44445a;font-weight:600}
-.hud-val{font-size:20px;font-weight:800;color:#f0f0ff;font-variant-numeric:tabular-nums;line-height:1}
-#lives-row{display:flex;gap:5px}
-.heart{font-size:14px}
-#lvl-badge{font-size:11px;padding:3px 10px;border-radius:100px;background:#1a1a3a;color:#7c7cff;font-weight:700;letter-spacing:.06em;border:1px solid #2a2a5a}
-
-/* Canvas area fills remaining height */
-#canvas-wrap{position:relative;flex:1;min-height:0;overflow:hidden;background:#07070f}
-canvas{display:block;width:100%;height:100%}
-
-/* Invisible tap zone during play */
-#tap-zone{position:absolute;inset:0;z-index:5;cursor:pointer;-webkit-user-select:none;user-select:none}
-#tap-zone.off{display:none}
-
-/* Jump button — shown only on touch screens */
-#jump-btn{
-  position:absolute;
-  right:18px;
-  bottom:max(18px,env(safe-area-inset-bottom,18px));
-  width:70px;height:70px;
-  border-radius:50%;
-  background:rgba(244,160,36,.14);
-  border:2px solid rgba(244,160,36,.45);
-  color:#f4a024;font-size:28px;font-weight:900;
-  z-index:10;cursor:pointer;
-  display:none;align-items:center;justify-content:center;
-  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-  transition:background .1s,transform .1s;
-  -webkit-user-select:none;user-select:none;touch-action:manipulation;
-}
-#jump-btn:active{background:rgba(244,160,36,.36);transform:scale(.91)}
-
-/* Screens */
-.screen{display:flex;flex-direction:column;align-items:center;gap:13px;padding:22px 20px;padding-bottom:max(22px,env(safe-area-inset-bottom,22px));background:#0f0f1e;border-top:1px solid #1e1e3a;flex-shrink:0}
-.screen.off{display:none}
-#logo{font-size:40px;font-weight:900;letter-spacing:-.04em;color:#fff;line-height:1;text-align:center}
-#logo span{color:#f4a024}
-#logo small{display:block;font-size:11px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:#555;margin-top:4px}
-.screen-sub{font-size:13px;color:#555;text-align:center;max-width:340px;line-height:1.7}
-.screen-sub b{color:#888}
-.btn{padding:14px 40px;border-radius:100px;border:none;font-size:16px;font-weight:800;cursor:pointer;transition:transform .12s,box-shadow .12s;letter-spacing:.02em;min-width:160px;touch-action:manipulation}
-.btn:active{transform:scale(.96)}
-.btn-orange{background:linear-gradient(135deg,#f4a024,#e85c24);color:#0a0a0f;box-shadow:0 4px 20px rgba(244,160,36,.35)}
-.tip{font-size:11px;color:#2a2a3a;letter-spacing:.08em;text-transform:uppercase}
-#go-title{font-size:32px;font-weight:900;letter-spacing:-.02em;color:#e84040;text-shadow:0 0 22px rgba(232,64,64,.4)}
-#go-best{font-size:13px;color:#f4a024;font-weight:600}
-.go-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:280px}
-.stat-card{background:#181828;border-radius:10px;padding:12px 16px;text-align:center;border:1px solid #252540}
-.stat-card .sv{font-size:22px;font-weight:800;color:#fff}
-.stat-card .sk{font-size:10px;color:#444;text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
-
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-
-/* Show jump button only on touchscreens */
-@media(hover:none) and (pointer:coarse){
-  #jump-btn{display:flex}
-  .tip{display:none}
-}
-@media(max-width:400px){
-  .hud-val{font-size:16px}.hud-label{font-size:8px}
-  #lvl-badge{font-size:9px;padding:2px 7px}.heart{font-size:12px}
-  #logo{font-size:32px}.screen{gap:10px;padding:16px 14px}
-  .btn{padding:13px 28px;font-size:15px}
-}
+html,body{height:100%;background:#1a1a1a;display:flex;align-items:center;justify-content:center;touch-action:none;overflow:hidden;font-family:-apple-system,sans-serif}
+#game-wrap{position:relative;width:100%;max-width:600px}
+canvas{display:block;width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges}
+#overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;pointer-events:none;display:none}
+#overlay.show{display:flex}
+#msg{font-size:12px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#ccc;text-align:center;line-height:1.8}
+/* top-right HUD */
+#hud-tr{position:absolute;top:8px;right:10px;text-align:right;line-height:1.4}
+#hi-label{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#555}
+#hi-val{font-size:13px;font-weight:700;color:#777;font-variant-numeric:tabular-nums;display:block}
+/* title */
+#title{position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#555;white-space:nowrap}
 </style>
 </head>
 <body>
-<div id="wrap">
-  <div id="hud">
-    <div class="hud-block"><span class="hud-label">Score</span><span class="hud-val" id="h-score">0</span></div>
-    <div class="hud-block"><span class="hud-label">Best</span><span class="hud-val" id="h-best">0</span></div>
-    <div class="hud-block" style="gap:4px"><span class="hud-label">Speed</span><div id="lvl-badge">LVL 1</div></div>
-    <div class="hud-block"><span class="hud-label">Lives</span><div id="lives-row"></div></div>
+<div id="game-wrap">
+  <canvas id="c"></canvas>
+  <div id="overlay" class="show">
+    <div id="msg">Drücke <b>Leertaste</b> oder <b>Tippen</b></div>
   </div>
-
-  <div id="canvas-wrap">
-    <canvas id="c"></canvas>
-    <div id="tap-zone" class="off"></div>
-    <div id="jump-btn" aria-label="Jump">↑</div>
+  <div id="hud-tr">
+    <span id="hi-label">HI</span>
+    <span id="hi-val">00000</span>
   </div>
-
-  <div class="screen" id="start-screen">
-    <div id="logo">Post <span>Jump</span><small>⚡ Side Runner</small></div>
-    <div class="screen-sub">Ausweichen, springen, überleben.<br><b>Leertaste / Tap</b> zum Springen.<br>Ab Level 3: <b>Doppelsprung</b>!</div>
-    <button class="btn btn-orange" id="btn-start">▶ Start</button>
-    <div class="tip">Space · Tap · Click</div>
-  </div>
-
-  <div class="screen off" id="go-screen">
-    <div id="go-title">GAME OVER</div>
-    <div class="go-stats">
-      <div class="stat-card"><div class="sv" id="gs-score">0</div><div class="sk">Score</div></div>
-      <div class="stat-card"><div class="sv" id="gs-best">0</div><div class="sk">Best</div></div>
-      <div class="stat-card"><div class="sv" id="gs-lvl">1</div><div class="sk">Level</div></div>
-      <div class="stat-card"><div class="sv" id="gs-coins">0</div><div class="sk">Coins</div></div>
-    </div>
-    <div id="go-best"></div>
-    <button class="btn btn-orange" id="btn-restart">↺ Nochmal</button>
-  </div>
+  <div id="title">POST — JUMP</div>
 </div>
 
 <script>
-const C=document.getElementById('c'),X=C.getContext('2d');
-// Logical resolution — always draw at this size, CSS scales it
-const LW=680,LH=210,GY=155;
+// ── Canvas ────────────────────────────────────────────────────
+const C=document.getElementById('c');
+const X=C.getContext('2d');
+const W=600,H=130;
+C.width=W; C.height=H;
 
-function resizeCanvas(){
-  const wrap=document.getElementById('canvas-wrap');
-  C.width=LW;C.height=LH;
-  C.style.width=wrap.clientWidth+'px';
-  C.style.height=wrap.clientHeight+'px';
-}
-resizeCanvas();
-window.addEventListener('resize',resizeCanvas);
-window.addEventListener('orientationchange',()=>setTimeout(resizeCanvas,120));
+// ── Constants ─────────────────────────────────────────────────
+const GROUND=92;   // y of the ground surface (player stands here)
+const PW=24,PH=28; // player width/height
+const GRAV=0.65;
+const JUMP_V=-13;
+const FALL_LIMIT=H+40; // if player falls below this → die
 
-const W=LW,H=LH;
-const GRAV=.58,J1=-13.5,J2=-10.5;
-let raf,running=false,frame=0;
-let score=0,coins_collected=0,best=+localStorage.getItem('pj2_best')||0;
-let lives=3,speed=5,lvl=1,scoreTimer=0,flashAlpha=0,levelUpMsg='',levelUpTimer=0;
-const P={x:80,y:GY,vy:0,jumps:0,maxJumps:1,invincible:0,w:40,h:46};
-let obstacles=[],coins=[],particles=[],groundSegs=[],clouds=[];
+// ── State ─────────────────────────────────────────────────────
+// 'idle' | 'running' | 'dead'
+let state='idle';
+let raf=null;
+let frame=0;
 
-for(let i=0;i<20;i++) groundSegs.push({x:i*38,w:22,h:3+Math.random()*4});
-for(let i=0;i<5;i++) clouds.push({x:Math.random()*W,y:20+Math.random()*50,w:60+Math.random()*80,opa:.04+Math.random()*.06,sp:.15+Math.random()*.25});
-const stars=[];
-for(let i=0;i<80;i++) stars.push({x:Math.random()*W,y:Math.random()*(GY-10),s:.5+Math.random()*1.5,sp:.08+Math.random()*.35,tw:Math.random()*Math.PI*2});
+let score=0;
+let best=+localStorage.getItem('pj_hi')||0;
+const hiEl=document.getElementById('hi-val');
+const overlay=document.getElementById('overlay');
+const msgEl=document.getElementById('msg');
 
-const OBS=[
-  {w:22,h:55,col:'#2d7a2d',top:'#3da83d'},
-  {w:18,h:72,col:'#1e5c48',top:'#28845a'},
-  {w:32,h:36,col:'#8c3030',top:'#c84040'},
-  {w:50,h:24,col:'#4a2a8c',top:'#6a3ab8'},
-  {w:26,h:60,col:'#5a3a1a',top:'#8c5c28'},
+// ── Level config ───────────────────────────────────────────────
+// Each level: {scoreThreshold, label, baseSpeed, hasPits, hasBirds, flashCol}
+const LEVELS=[
+  {t:0,   label:'LVL 1 — Warm up',   spd:5.5, pits:false, birds:false, col:'#55aaff'},
+  {t:150, label:'LVL 2 — Pick it up',spd:7,   pits:false, birds:false, col:'#55ff99'},
+  {t:350, label:'LVL 3 — Watch out!', spd:8.5, pits:true,  birds:false, col:'#ffcc44'},
+  {t:600, label:'LVL 4 — Danger!',   spd:10,  pits:true,  birds:true,  col:'#ff8844'},
+  {t:900, label:'LVL 5 — INSANE',    spd:12,  pits:true,  birds:true,  col:'#ff4455'},
 ];
+let lvl=0; // current level index
+let levelFlash=0; // frames to show level banner
 
-function rng(a,b){return a+Math.random()*(b-a);}
-function ov(ax,ay,aw,ah,bx,by,bw,bh,m){m=m||0;return ax+m<bx+bw&&ax+aw-m>bx&&ay+m<by+bh&&ay+ah-m>by;}
-function burst(x,y,col,n,vs){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,v=(1+Math.random()*3)*vs;particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-2,life:20+Math.random()*15,ml:35,col});}}
-function jumpDust(){for(let i=0;i<8;i++) particles.push({x:P.x+P.w*.5,y:P.y+P.h,vx:(Math.random()-.5)*4,vy:-1-Math.random()*2,life:14,ml:14,col:'#444470'});}
-function spawnObs(){const t={...OBS[Math.floor(Math.random()*OBS.length)]};obstacles.push({x:W+30,y:GY-t.h+50,...t});}
-function spawnCoin(){coins.push({x:W+20,y:rng(GY-90,GY-25),r:7,alive:true,bob:Math.random()*Math.PI*2});}
+// ── Player ────────────────────────────────────────────────────
+const P={x:70, y:GROUND, vy:0, onGround:true};
 
-function reset(){
-  P.x=80;P.y=GY;P.vy=0;P.jumps=0;P.maxJumps=1;P.invincible=0;
-  obstacles=[];coins=[];particles=[];
-  score=0;coins_collected=0;lives=3;speed=5;lvl=1;frame=0;flashAlpha=0;levelUpTimer=0;scoreTimer=0;
-  updateHUD();
-}
+// ── Entities ──────────────────────────────────────────────────
+let obstacles=[];  // {x,y,w,h,variant}
+let birds=[];      // {x,y,w,h}
+let pits=[];       // {x,w}  — gaps in the ground
+let groundX=0;
 
-// ── Input ──────────────────────────────────────────────────────
-function doJump(){
-  if(!running)return;
-  if(P.jumps<P.maxJumps){P.vy=P.jumps===0?J1:J2;P.jumps++;jumpDust();}
-}
+let nextObs=70;
+let nextBird=500;
+let nextPit=400;
 
-document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();doJump();}});
+// ── Clouds ────────────────────────────────────────────────────
+const clouds=[];
+for(let i=0;i<4;i++) clouds.push({x:80+i*155,y:12+Math.random()*22,w:38+Math.random()*28});
 
-// Tap zone (whole canvas — touchstart+click)
-const tz=document.getElementById('tap-zone');
-tz.addEventListener('touchstart',e=>{e.preventDefault();doJump();},{passive:false});
-tz.addEventListener('click',doJump);
+// ── Helpers ───────────────────────────────────────────────────
+function pad(n,d){return String(Math.floor(n)).padStart(d,'0');}
 
-// Dedicated jump button
-const jb=document.getElementById('jump-btn');
-jb.addEventListener('touchstart',e=>{e.stopPropagation();e.preventDefault();doJump();},{passive:false});
-jb.addEventListener('click',e=>{e.stopPropagation();doJump();});
-
-document.getElementById('btn-start').addEventListener('click',startGame);
-document.getElementById('btn-restart').addEventListener('click',startGame);
-
-// ── HUD ───────────────────────────────────────────────────────
 function updateHUD(){
-  document.getElementById('h-score').textContent=score;
-  document.getElementById('h-best').textContent=Math.max(score,best);
-  document.getElementById('lvl-badge').textContent='LVL '+lvl;
-  const lr=document.getElementById('lives-row');lr.innerHTML='';
-  for(let i=0;i<3;i++){
-    const s=document.createElement('span');s.className='heart';
-    s.textContent='♥';s.style.color=i<lives?'#e84040':'#333';
-    if(i>=lives)s.style.opacity='.22';lr.appendChild(s);
+  hiEl.textContent=pad(Math.max(score,best),5);
+  const l=LEVELS[lvl];
+}
+
+function collides(ax,ay,aw,ah,bx,by,bw,bh){
+  const m=4;
+  return ax+m<bx+bw && ax+aw-m>bx && ay+m<by+bh && ay+ah-m>by;
+}
+
+// ── Spawn helpers ─────────────────────────────────────────────
+function spawnObs(){
+  const v=Math.floor(Math.random()*3);
+  const h=[26,32,28][v];
+  const w=[14,26,20][v];
+  const double=score>300&&Math.random()<0.22;
+  const oy=GROUND+PH-h; // sits on the ground
+  obs.push({x:W+8,y:oy,w,h,v});
+  if(double) obs.push({x:W+8+w+10,y:oy,w,h,v});
+}
+// alias so I can use both names
+let obs=obstacles;
+
+function spawnBird(){
+  // Low bird (must jump over) or high bird (run under — but no crouch, so just avoid)
+  const hy=Math.random()<0.5 ? GROUND-20 : GROUND+4;
+  birds.push({x:W+8,y:hy,w:38,h:18});
+}
+
+function spawnPit(){
+  // A gap in the ground — player must jump over it
+  const pw=30+Math.random()*20;
+  pits.push({x:W+8,w:pw,alive:true});
+}
+
+// ── Reset / start ─────────────────────────────────────────────
+function startGame(){
+  // Cancel any existing loop first
+  if(raf!==null){cancelAnimationFrame(raf);raf=null;}
+
+  state='running';
+  frame=0; score=0; lvl=0; levelFlash=0;
+  obs=[]; obstacles=obs; birds=[]; pits=[];
+  P.x=70; P.y=GROUND; P.vy=0; P.onGround=true;
+  groundX=0;
+  nextObs=70; nextBird=500; nextPit=400;
+  overlay.classList.remove('show');
+  updateHUD();
+  raf=requestAnimationFrame(loop);
+}
+
+function die(){
+  if(state==='dead')return; // guard against double-call
+  state='dead';
+  cancelAnimationFrame(raf); raf=null;
+  if(score>best){best=score;localStorage.setItem('pj_hi',best);}
+  updateHUD();
+  msgEl.innerHTML=`GAME OVER &nbsp;·&nbsp; Score: <b>${pad(score,5)}</b><br>Tippen oder Leertaste`;
+  overlay.classList.add('show');
+  // Draw one last frame with player faded
+  drawFrame(true);
+}
+
+// ── Input ─────────────────────────────────────────────────────
+function doAction(){
+  if(state==='idle'||state==='dead'){startGame();return;}
+  if(state==='running'&&P.onGround){
+    P.vy=JUMP_V;
+    P.onGround=false;
   }
 }
 
-// ── Draw helpers ──────────────────────────────────────────────
-function rr(x,y,w,h,r){
-  X.beginPath();X.moveTo(x+r,y);X.lineTo(x+w-r,y);X.arcTo(x+w,y,x+w,y+r,r);
-  X.lineTo(x+w,y+h-r);X.arcTo(x+w,y+h,x+w-r,y+h,r);
-  X.lineTo(x+r,y+h);X.arcTo(x,y+h,x,y+h-r,r);
-  X.lineTo(x,y+r);X.arcTo(x,y,x+r,y,r);X.closePath();
-}
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();doAction();}
+});
+document.addEventListener('touchstart',e=>{e.preventDefault();doAction();},{passive:false});
+C.addEventListener('click',doAction);
 
-function drawBG(){
-  const sky=X.createLinearGradient(0,0,0,GY);
-  sky.addColorStop(0,'#06061a');sky.addColorStop(1,'#0e0e30');
-  X.fillStyle=sky;X.fillRect(0,0,W,GY);
-  for(const s of stars){
-    s.tw+=.04;X.globalAlpha=.3+Math.sin(s.tw)*.2;X.fillStyle='#cce';
-    X.beginPath();X.arc(s.x,s.y,s.s,0,Math.PI*2);X.fill();
-    s.x-=s.sp;if(s.x<-2){s.x=W+2;s.y=Math.random()*(GY-10);}
-  }
-  X.globalAlpha=1;
+// ── Drawing ───────────────────────────────────────────────────
+function drawClouds(){
+  X.fillStyle='#2e2e2e';
   for(const cl of clouds){
-    X.fillStyle=`rgba(180,180,255,${cl.opa})`;rr(cl.x,cl.y,cl.w,18,9);X.fill();
-    cl.x-=cl.sp;if(cl.x<-cl.w)cl.x=W+cl.w;
-  }
-  const gg=X.createLinearGradient(0,GY,0,H);
-  gg.addColorStop(0,'#181830');gg.addColorStop(1,'#0a0a18');
-  X.fillStyle=gg;X.fillRect(0,GY,W,H-GY);
-  X.strokeStyle='rgba(100,100,255,.22)';X.lineWidth=1.5;
-  X.beginPath();X.moveTo(0,GY+50);X.lineTo(W,GY+50);X.stroke();
-  X.fillStyle='#1e1e40';
-  for(const g of groundSegs){g.x-=speed*.6;if(g.x<-40)g.x=W+20;X.fillRect(g.x,GY+50,g.w,g.h);}
-}
-
-function drawPlayer(){
-  if(P.invincible>0&&Math.floor(P.invincible/5)%2)return;
-  const px=Math.round(P.x),py=Math.round(P.y),og=P.y>=GY-1;
-  const sd=Math.max(0,1-(P.y-(GY-50))/50);
-  if(sd>0){X.globalAlpha=sd*.32;X.fillStyle='#000';X.beginPath();X.ellipse(px+P.w/2,GY+52,18*sd,5*sd,0,0,Math.PI*2);X.fill();X.globalAlpha=1;}
-  if(!og&&P.vy<0){X.shadowColor='#f4a024';X.shadowBlur=18;}
-  X.fillStyle='#f4a024';rr(px+2,py,38,46,7);X.fill();X.shadowBlur=0;
-  X.fillStyle='rgba(0,0,0,.18)';rr(px+22,py,18,46,7);X.fill();
-  X.fillStyle='#0a0a1e';rr(px+7,py+9,26,14,5);X.fill();
-  const vg=X.createLinearGradient(0,py+9,0,py+23);vg.addColorStop(0,'#66ccff');vg.addColorStop(1,'#0066aa');
-  X.fillStyle=vg;rr(px+9,py+11,22,10,3);X.fill();
-  X.fillStyle='rgba(255,255,255,.4)';X.fillRect(px+11,py+12,7,3);
-  const ls=og?Math.sin(frame*.22)*8:0;
-  X.fillStyle='#c07010';X.fillRect(px+6,py+46,12,10+Math.max(0,ls));X.fillRect(px+22,py+46,12,10+Math.max(0,-ls));
-  X.fillStyle='#805010';X.fillRect(px+4,py+52+Math.max(0,ls),15,5);X.fillRect(px+20,py+52+Math.max(0,-ls),15,5);
-  X.strokeStyle='#aaa';X.lineWidth=1.5;X.beginPath();X.moveTo(px+22,py);X.lineTo(px+24,py-8);X.stroke();
-  X.fillStyle=lvl>=3?'#ff44ff':'#f4a024';X.beginPath();X.arc(px+24,py-10,3,0,Math.PI*2);X.fill();
-}
-
-function drawObstacles(){
-  for(const o of obstacles){
-    X.globalAlpha=.28;X.fillStyle='#000';X.beginPath();X.ellipse(o.x+o.w/2,GY+52,o.w/2+3,5,0,0,Math.PI*2);X.fill();X.globalAlpha=1;
-    X.fillStyle=o.col;rr(o.x,o.y,o.w,o.h,5);X.fill();
-    X.fillStyle=o.top;rr(o.x+3,o.y+3,o.w-6,7,3);X.fill();
-    X.fillStyle='rgba(255,255,255,.07)';X.fillRect(o.x,o.y,3,o.h);
+    X.fillRect(cl.x,cl.y,cl.w,5);
+    X.fillRect(cl.x+7,cl.y-3,cl.w-14,3);
+    cl.x-=0.9;
+    if(cl.x<-cl.w-10)cl.x=W+cl.w;
   }
 }
 
-function drawCoins(){
-  for(const c of coins){
-    if(!c.alive)continue;c.bob+=.07;const cy=c.y+Math.sin(c.bob)*5;
-    X.shadowColor='#ffe066';X.shadowBlur=12;X.fillStyle='#ffe066';X.beginPath();X.arc(c.x,cy,c.r,0,Math.PI*2);X.fill();
-    X.strokeStyle='#c87800';X.lineWidth=1.5;X.beginPath();X.arc(c.x,cy,c.r,0,Math.PI*2);X.stroke();X.shadowBlur=0;
-    X.fillStyle='#a06000';X.font='bold 9px sans-serif';X.textAlign='center';X.textBaseline='middle';X.fillText('$',c.x,cy);
-  }
-}
+function drawGround(activeSpeed){
+  const sp=activeSpeed||0;
+  // Draw ground segments — skip over pit gaps
+  X.fillStyle='#555';
+  // Full ground line, then we'll "cut" pits by drawing background over them
+  X.fillRect(0,GROUND+PH,W,2);
 
-function drawParticles(){
-  for(const p of particles){X.globalAlpha=p.life/p.ml;X.fillStyle=p.col;X.beginPath();X.arc(p.x,p.y,2.5,0,Math.PI*2);X.fill();p.x+=p.vx;p.y+=p.vy;p.vy+=.12;p.life--;}
-  X.globalAlpha=1;particles=particles.filter(p=>p.life>0);
-}
-
-function drawOverlays(){
-  X.globalAlpha=.07;X.fillStyle='#fff';X.font='bold 80px -apple-system,sans-serif';X.textAlign='right';X.textBaseline='middle';X.fillText(score,W-20,GY/2+10);X.globalAlpha=1;
-  if(flashAlpha>0){X.fillStyle=`rgba(220,40,40,${flashAlpha})`;X.fillRect(0,0,W,H);flashAlpha=Math.max(0,flashAlpha-.04);}
-  if(levelUpTimer>0){X.globalAlpha=Math.min(1,levelUpTimer/10);X.fillStyle='#fff';X.font='bold 18px -apple-system,sans-serif';X.textAlign='center';X.textBaseline='middle';X.fillText(levelUpMsg,W/2,GY/2);X.globalAlpha=1;levelUpTimer--;}
-}
-
-// ── Game loop ────────────────────────────────────────────────
-function gameLoop(){
-  frame++;X.clearRect(0,0,W,H);drawBG();drawOverlays();
-  const nl=Math.min(10,1+Math.floor(score/180));
-  if(nl!==lvl){lvl=nl;speed=Math.min(14,5+lvl);P.maxJumps=lvl>=3?2:1;levelUpMsg=lvl>=3?`LEVEL ${lvl} — Double Jump!`:`LEVEL ${lvl} — Speed up!`;levelUpTimer=60;updateHUD();}
-  const lo=obstacles.length?obstacles[obstacles.length-1]:null;
-  const mg=Math.max(140,260-lvl*10);
-  if(!lo||W+30-lo.x>mg+rng(0,100)){if(Math.random()<.85){spawnObs();if(Math.random()<.4&&Math.random()<.55)spawnCoin();}}
-  if(frame%100===0&&Math.random()<.4)spawnCoin();
-  for(const o of obstacles)o.x-=speed;
-  for(const c of coins)c.x-=speed*.75;
-  obstacles=obstacles.filter(o=>o.x>-80);coins=coins.filter(c=>c.x>-20);
-  P.vy+=GRAV;P.y+=P.vy;
-  if(P.y>=GY){P.y=GY;P.vy=0;P.jumps=0;}
-  if(P.invincible>0)P.invincible--;
-  if(P.invincible===0){
-    for(const o of obstacles){
-      if(ov(P.x+4,P.y+4,34,42,o.x,o.y,o.w,o.h,5)){
-        lives--;burst(P.x+20,P.y+25,'#f4a024',18,1);burst(P.x+20,P.y+25,'#e84040',10,1.5);
-        flashAlpha=.5;P.invincible=90;updateHUD();
-        if(lives<=0){endGame();return;}break;
-      }
+  // Scrolling pebbles
+  X.fillStyle='#3a3a3a';
+  const off=Math.floor(groundX)%36;
+  for(let x=-off;x<W;x+=36){
+    // check if this x is inside a pit — skip
+    let inPit=false;
+    for(const p of pits){if(x>=p.x-4&&x<=p.x+p.w+4){inPit=true;break;}}
+    if(!inPit){
+      X.fillRect(x,GROUND+PH+4,12,2);
+      X.fillRect(x+20,GROUND+PH+7,6,1);
     }
   }
-  for(const c of coins){
-    if(!c.alive)continue;
-    if(ov(P.x+4,P.y+4,34,42,c.x-c.r,c.y-c.r,c.r*2,c.r*2)){c.alive=false;score+=10;coins_collected++;burst(c.x,c.y,'#ffe066',10,1.2);updateHUD();}
+
+  // Draw pits — erase ground line and fill with dark void
+  for(const p of pits){
+    // Black void below pit
+    X.fillStyle='#0d0d0d';
+    X.fillRect(p.x,GROUND+PH-2,p.w,H-(GROUND+PH-2));
+    // Erase the ground line over the pit
+    X.fillStyle='#1a1a1a';
+    X.fillRect(p.x,GROUND+PH,p.w,3);
+    // Pit edge shadows
+    X.fillStyle='#333';
+    X.fillRect(p.x-2,GROUND+PH,2,8);
+    X.fillRect(p.x+p.w,GROUND+PH,2,8);
   }
-  scoreTimer++;if(scoreTimer>=2){score++;scoreTimer=0;}
-  if(frame%30===0)updateHUD();
-  drawObstacles();drawCoins();drawPlayer();drawParticles();
-  raf=requestAnimationFrame(gameLoop);
 }
 
-function startGame(){
-  document.getElementById('start-screen').classList.add('off');
-  document.getElementById('go-screen').classList.add('off');
-  tz.classList.remove('off');
-  reset();running=true;raf=requestAnimationFrame(gameLoop);
+function drawPlayer(dead){
+  X.globalAlpha=dead?0.35:1;
+  const px=Math.round(P.x), py=Math.round(P.y);
+  // Body
+  X.fillStyle='#e0e0e0';
+  X.fillRect(px,py,PW,PH);
+  // Shade right side
+  X.fillStyle='rgba(0,0,0,0.15)';
+  X.fillRect(px+PW-7,py,7,PH);
+  // Visor
+  X.fillStyle='#111';
+  X.fillRect(px+3,py+5,PW-6,8);
+  X.fillStyle=lvl>=2?LEVELS[lvl].col:'#55aaff';
+  X.fillRect(px+4,py+6,PW-11,6);
+  // Visor glare
+  X.fillStyle='rgba(255,255,255,0.35)';
+  X.fillRect(px+5,py+7,5,2);
+  // Legs animated
+  const lg=state==='running'?Math.floor(frame/5)%2:0;
+  X.fillStyle='#aaa';
+  X.fillRect(px+3,   py+PH, 7, lg===0?8:4);
+  X.fillRect(px+PW-10,py+PH, 7, lg===0?4:8);
+  // Boots
+  X.fillStyle='#888';
+  X.fillRect(px+2,   py+PH+(lg===0?8:4), 9, 3);
+  X.fillRect(px+PW-11,py+PH+(lg===0?4:8),9, 3);
+  // Arms
+  X.fillStyle='#bbb';
+  X.fillRect(px-3,py+7,4,10);
+  X.fillRect(px+PW-1,py+7,4,10);
+  X.globalAlpha=1;
 }
 
-function endGame(){
-  cancelAnimationFrame(raf);running=false;
-  tz.classList.add('off');
-  if(score>best){best=score;localStorage.setItem('pj2_best',best);}
-  document.getElementById('gs-score').textContent=score;
-  document.getElementById('gs-best').textContent=Math.max(score,best);
-  document.getElementById('gs-lvl').textContent=lvl;
-  document.getElementById('gs-coins').textContent=coins_collected;
-  const gb=document.getElementById('go-best');
-  gb.textContent=score>=best?'🏆 Neuer Highscore!':'Best: '+best;
-  gb.style.color=score>=best?'#f4a024':'#666';
-  document.getElementById('go-screen').classList.remove('off');
+function drawObs(o){
+  X.fillStyle='#d0d0d0';
+  const mx=o.x+Math.floor(o.w/2)-3;
+  X.fillRect(mx,o.y,6,o.h); // stem
+  if(o.v===0){
+    X.fillRect(o.x,o.y+7,o.w,5);
+  } else if(o.v===1){
+    X.fillRect(o.x,o.y+9,7,o.h-9);
+    X.fillRect(o.x+o.w-7,o.y+13,7,o.h-13);
+    X.fillRect(o.x,o.y+9,o.w,4);
+  } else {
+    X.fillRect(o.x,o.y+7,7,o.h-7);
+    X.fillRect(o.x+o.w-7,o.y+11,7,o.h-11);
+    X.fillRect(o.x,o.y+7,o.w,4);
+  }
 }
 
-// Initial idle frame
+function drawBird(b){
+  const flap=Math.floor(frame/7)%2;
+  X.fillStyle='#c8c8c8';
+  X.fillRect(b.x+7,b.y+5,18,7); // body
+  X.fillRect(b.x+23,b.y+3,8,5); // head
+  X.fillRect(b.x+29,b.y+5,6,3); // beak
+  X.fillRect(b.x,flap?b.y+9:b.y, 34,5); // wing
+}
+
+function drawScore(){
+  X.fillStyle='#5a5a5a';
+  X.font='bold 13px monospace';
+  X.textAlign='left';
+  X.textBaseline='top';
+  X.fillText(pad(score,5),10,8);
+}
+
+function drawLevelFlash(){
+  if(levelFlash>0){
+    const alpha=Math.min(1,levelFlash/20);
+    X.globalAlpha=alpha;
+    X.fillStyle=LEVELS[lvl].col;
+    X.font='bold 11px -apple-system,monospace';
+    X.textAlign='center';
+    X.textBaseline='middle';
+    X.fillText(LEVELS[lvl].label, W/2, H/2-10);
+    X.globalAlpha=1;
+    levelFlash--;
+  }
+}
+
+// Single draw pass — called from loop and once from die()
+function drawFrame(dead){
+  X.clearRect(0,0,W,H);
+  drawClouds();
+  drawGround();
+  for(const o of obs)drawObs(o);
+  for(const b of birds)drawBird(b);
+  drawPlayer(!!dead);
+  drawScore();
+  drawLevelFlash();
+}
+
+// ── Main loop ─────────────────────────────────────────────────
+function loop(){
+  raf=requestAnimationFrame(loop);
+  frame++;
+
+  const curLvl=LEVELS[lvl];
+  const spd=curLvl.spd;
+
+  // ── Level check ──
+  for(let i=LEVELS.length-1;i>=0;i--){
+    if(score>=LEVELS[i].t&&i!==lvl){
+      lvl=i;
+      levelFlash=80;
+      updateHUD();
+      break;
+    }
+  }
+
+  // ── Score ──
+  if(frame%6===0){score++;if(frame%30===0)updateHUD();}
+
+  // ── Physics ──
+  P.vy+=GRAV;
+  P.y+=P.vy;
+
+  // Landing: check if player is above a pit or solid ground
+  if(P.vy>=0){
+    const footX=P.x+PW/2;
+    const groundY=GROUND;
+    let overPit=false;
+    for(const p of pits){
+      // foot X is inside pit horizontally?
+      if(footX>p.x+3&&footX<p.x+p.w-3){overPit=true;break;}
+    }
+    if(!overPit&&P.y>=groundY){
+      P.y=groundY;P.vy=0;P.onGround=true;
+    }
+  }
+
+  // Fall into pit → die
+  if(P.y>FALL_LIMIT){die();return;}
+
+  // ── Ground scroll ──
+  groundX+=spd;
+
+  // ── Spawn obstacles ──
+  nextObs--;
+  if(nextObs<=0){
+    spawnObs();
+    nextObs=Math.floor(55+Math.random()*70+(180/spd)*1.8);
+  }
+
+  // ── Spawn birds ──
+  if(curLvl.birds){
+    nextBird--;
+    if(nextBird<=0){
+      spawnBird();
+      nextBird=Math.floor(100+Math.random()*160);
+    }
+  }
+
+  // ── Spawn pits ──
+  if(curLvl.pits){
+    nextPit--;
+    if(nextPit<=0){
+      // Only spawn pit if no obstacle is close to landing zone
+      const safe=!obs.some(o=>o.x>W-60&&o.x<W+20);
+      if(safe)spawnPit();
+      nextPit=Math.floor(130+Math.random()*180);
+    }
+  }
+
+  // ── Move entities ──
+  obs.forEach(o=>o.x-=spd);
+  birds.forEach(b=>b.x-=spd+1.2);
+  pits.forEach(p=>p.x-=spd);
+
+  obs=obs.filter(o=>o.x>-60);
+  birds=birds.filter(b=>b.x>-60);
+  pits=pits.filter(p=>p.x+p.w>-10);
+  // keep the global alias in sync
+  obstacles=obs;
+
+  // ── Collisions ──
+  for(const o of obs){
+    if(collides(P.x,P.y,PW,PH,o.x,o.y,o.w,o.h)){die();return;}
+  }
+  for(const b of birds){
+    if(collides(P.x,P.y,PW,PH,b.x,b.y,b.w,b.h)){die();return;}
+  }
+
+  // ── Draw ──
+  drawFrame(false);
+}
+
+// ── Initial idle frame ────────────────────────────────────────
 (function(){
-  X.clearRect(0,0,W,H);drawBG();
-  X.fillStyle='#f4a024';rr(P.x,P.y,40,46,7);X.fill();
-  X.fillStyle='#0a0a1e';rr(P.x+7,P.y+9,26,14,5);X.fill();
-  X.fillStyle='#66ccff';rr(P.x+9,P.y+11,22,10,3);X.fill();
-  X.fillStyle='#c07010';X.fillRect(P.x+6,P.y+46,12,10);X.fillRect(P.x+22,P.y+46,12,10);
+  X.clearRect(0,0,W,H);
+  drawClouds();
+  drawGround();
+  X.fillStyle='#e0e0e0';
+  X.fillRect(P.x,P.y,PW,PH);
+  X.fillStyle='#111';
+  X.fillRect(P.x+3,P.y+5,PW-6,8);
+  X.fillStyle='#55aaff';
+  X.fillRect(P.x+4,P.y+6,PW-11,6);
+  X.fillStyle='#aaa';
+  X.fillRect(P.x+3,P.y+PH,7,8);X.fillRect(P.x+PW-10,P.y+PH,7,4);
+  updateHUD();
 })();
-updateHUD();
 </script>
 </body>
 </html>
